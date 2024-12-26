@@ -44,7 +44,7 @@ bot.start(async (ctx) => {
           },
         }
       );
-  } catch (err) {
+  } catch (err) { 
     console.error("Ошибка при запуске:", err);
     await ctx.reply("Произошла ошибка при запуске." + err);
   }
