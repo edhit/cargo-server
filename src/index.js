@@ -30,17 +30,13 @@ if (process.env.WEBHOOK === "") {
 	});
 }
 
-const text = `
-
-
-
-`
+const text = (process.env.START) ? process.env.START : 'Привет! Чтобы начать использовать бота, откройте WebApp, нажав на кнопку ниже.'
 
 bot.start(async (ctx) => {
 	try {
 		if (ctx.chat && ctx.chat.username) {
 			await ctx.reply(
-				"Привет! Чтобы начать использовать бота, откройте WebApp, нажав на кнопку ниже.", {
+				text, {
 					reply_markup: {
 						inline_keyboard: [
 							[{
@@ -99,8 +95,7 @@ app.post("/api/sendMessage", async (req, res) => {
 
 		if (req.body.data.form === "cargo") {
 			message = `
-	  📦 Отправка посылки
-	  📱 Груз: ${req.body.data.type}
+	  📦 Груз: ${req.body.data.type}
 	  ⚖️ Вес: ${req.body.data.weight}
 	  💰 Цена за кг: ${req.body.data.price}
 	  📍 Откуда: ${req.body.data.from}
@@ -110,16 +105,20 @@ app.post("/api/sendMessage", async (req, res) => {
 
 			channel = 'cargo_life'
 		} else if (req.body.data.form === "exchange_saudi") {
-			// 		message = `
-			//   📦 Отправка посылки
-			//   📱 Груз: ${req.body.data.type}
-			//   ⚖️ Вес: ${req.body.data.weight}
-			//   💰 Цена за кг: ${req.body.data.price}
-			//   📍 Откуда: ${req.body.data.from}
-			//   📍 Куда: ${req.body.data.to}
-			//   ${req.body.data.comment ? `📝 Комментарий: ${req.body.data.comment}` : ""}
-			// 	  `;
-			// channel = 'exchange_saudi'
+			const typeIcon = req.body.data.type === "Купить" ? "🟢" : "🔴";
+
+			message = `
+		  ${typeIcon} Тип: ${req.body.data.type}
+		  💱 Валюта продажи: ${req.body.data.sellCurrency}
+		  💰 Валюта покупки: ${req.body.data.buyCurrency}
+		  💵 Сумма: ${req.body.data.amount}
+		  📊 Курс: ${req.body.data.rate}
+		  🏙️ Город: ${req.body.data.city}
+		  🔄 Способ обмена: ${req.body.data.exchange}
+		  🚚 Доставка: ${req.body.data.delivery}
+		  ${req.body.data.comment ? `📝 Комментарий: ${req.body.data.comment}` : ""}
+		  `;
+			channel = 'saudi_obmen'
 		}
 		if (message && channel) {
 			message_data = await bot.telegram.sendMessage(
