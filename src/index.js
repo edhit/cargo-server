@@ -30,21 +30,31 @@ if (process.env.WEBHOOK === "") {
 	});
 }
 
+const text = `
+
+
+
+`
+
 bot.start(async (ctx) => {
 	try {
-		const message_data = await ctx.reply(
-			"Привет! Чтобы начать использовать бота, откройте WebApp, нажав на кнопку ниже.", {
-				reply_markup: {
-					inline_keyboard: [
-						[{
-							text: "Cargo",
-							url: process.env.WEB_APP_CARGO, // Укажите URL вашего WebApp
-						}, ],
-					],
-				},
-				disable_web_page_preview: true, // Отключение превью ссылки
-			}
-		);
+		if (ctx.chat && ctx.chat.username) {
+			await ctx.reply(
+				"Привет! Чтобы начать использовать бота, откройте WebApp, нажав на кнопку ниже.", {
+					reply_markup: {
+						inline_keyboard: [
+							[{
+								text: "Cargo",
+								url: process.env.WEB_APP_CARGO, // Укажите URL вашего WebApp
+							}, ],
+						],
+					},
+					disable_web_page_preview: true, // Отключение превью ссылки
+				}
+			);
+		} else {
+			await ctx.reply("السلام عليكم ورحمة الله وبركاته \n\n🛂 Чтобы начать использовать бота, пожалуйста, укажите имя пользователя в настройках Telegram. Перейдите в настройки Telegram, откройте раздел 'Изменить профиль' и добавьте ваше имя пользователя.")
+		}
 
 	} catch (err) {
 		console.error("Ошибка при запуске:", err);
@@ -86,7 +96,7 @@ bot.action(/delete_(.+)/, async (ctx) => {
 app.post("/api/sendMessage", async (req, res) => {
 	try {
 		let message, channel, message_data;
-		
+
 		if (req.body.data.form === "cargo") {
 			message = `
 	  📦 Отправка посылки
@@ -97,8 +107,21 @@ app.post("/api/sendMessage", async (req, res) => {
 	  📍 Куда: ${req.body.data.to}
 	  ${req.body.data.comment ? `📝 Комментарий: ${req.body.data.comment}` : ""}
 		  `;
-		  
+
 			channel = 'cargo_life'
+		} else if (req.body.data.form === "exchange_saudi") {
+			// 		message = `
+			//   📦 Отправка посылки
+			//   📱 Груз: ${req.body.data.type}
+			//   ⚖️ Вес: ${req.body.data.weight}
+			//   💰 Цена за кг: ${req.body.data.price}
+			//   📍 Откуда: ${req.body.data.from}
+			//   📍 Куда: ${req.body.data.to}
+			//   ${req.body.data.comment ? `📝 Комментарий: ${req.body.data.comment}` : ""}
+			// 	  `;
+			// channel = 'exchange_saudi'
+		}
+		if (message && channel) {
 			message_data = await bot.telegram.sendMessage(
 				`@${channel}`, // ID канала
 				message, {
@@ -111,16 +134,8 @@ app.post("/api/sendMessage", async (req, res) => {
 					disable_web_page_preview: true, // Отключение превью ссылки
 				}
 			);
-		} else if (req.body.data.form === "exchange_saudi") {
-			channel = 'exchange_saudi'
-			//   message_data = await bot.telegram.sendMessage(
-			//     "", // ID канала
-			//     message
-			//     // Markup.inlineKeyboard([
-			//     //   Markup.button.callback("🗑 Удалить", `delete_${savedCargo._id}`),
-			//     // ])
-			//   );
 		}
+
 		if (message_data && channel) {
 			await bot.telegram.sendMessage(
 				req.body.user.chatId, // ID пользователя
