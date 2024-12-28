@@ -98,6 +98,16 @@ show_status() {
     docker-compose ps
 }
 
+# Функция для остановки проекта
+stop_project() {
+    echo "Остановка всех контейнеров..."
+    docker-compose down &>> "$LOG_FILE" || {
+        echo "Ошибка при остановке контейнеров. Подробности см. в $LOG_FILE"
+        exit 1
+    }
+    echo "Все контейнеры успешно остановлены."
+}
+
 # Обработка аргументов
 case $1 in
     init)
@@ -112,11 +122,16 @@ case $1 in
         echo "Выбрана команда: Статус"
         show_status
         ;;
+    stop)
+        echo "Выбрана команда: Остановка"
+        stop_project
+        ;;
     *)
-        echo "Использование: $0 [init|update|status]"
+        echo "Использование: $0 [init|update|status|stop]"
         echo "  init    - Инициализировать проект с нуля"
         echo "  update  - Обновить проект (pull и перезапуск)"
         echo "  status  - Показать состояние контейнеров"
+        echo "  stop    - Остановить все контейнеры"
         exit 1
         ;;
 esac
